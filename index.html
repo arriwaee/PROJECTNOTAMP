@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nota CV. Mandiri Putra (Dark Mode)</title>
+    <title>CV. Mandiri Putra</title>
 
     <script>
       tailwind.config = {
@@ -15,15 +15,18 @@
             },
           },
         },
-        plugins: [require("@tailwindcss/forms")],
+        // HAPUS 'plugins: [require...]' DARI SINI
+        // Kita memuatnya di URL CDN di bawah
       };
     </script>
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/idb@7/build/umd.js"></script>
 
     <link rel="manifest" href="manifest.json" />
     <meta name="theme-color" content="#0d1117" />
+
     <style type="text/tailwindcss">
       @layer base {
         input[type="number"]::-webkit-outer-spin-button,
@@ -89,7 +92,8 @@
       }
     </style>
   </head>
-  <body class="bg-gray-100 p-4 lg:p-8">
+  
+  <body class="p-4 lg:p-8">
     <div class="container mx-auto max-w-7xl px-4">
       <h1 class="text-3xl font-bold tracking-tight text-white mb-8">
         Dashboard Nota <span class="text-primary-400">CV. MANDIRI PUTRA</span>
@@ -359,7 +363,7 @@
                   <p>
                     <strong>Tanggal:</strong>
                     <span id="nota-tanggal" class="font-normal"></span>
-                  </p>
+                  </D>
                 </div>
 
                 <table class="item-list w-full mb-6">
@@ -380,7 +384,7 @@
                 <hr class="border-t-2 border-dashed border-gray-400 my-4" />
 
                 <div class="total-akhir flex justify-end">
-                  <table class="tabel-total w-full sm:w-1/2">
+                  <table class="tabel-total w-full sm:w-1G/2">
                     <tbody>
                       <tr class="text-right">
                         <td class="p-1">Total Sewa Barang:</td>

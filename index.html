@@ -1,19 +1,31 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Program Nota v2 (IndexedDB)</title>
+    <title>Nota CV. Mandiri Putra (Dark Mode)</title>
+
+    <script>
+      tailwind.config = {
+        darkMode: "class", // Aktifkan dark mode
+        theme: {
+          extend: {
+            colors: {
+              primary: tailwind.colors.cyan,
+            },
+          },
+        },
+        plugins: [require("@tailwindcss/forms")],
+      };
+    </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/idb@7/build/umd.js"></script>
 
     <link rel="manifest" href="manifest.json" />
-    <meta name="theme-color" content="#4f46e5" />
-
+    <meta name="theme-color" content="#0d1117" />
     <style type="text/tailwindcss">
       @layer base {
-        /* Sembunyikan panah di input number */
         input[type="number"]::-webkit-outer-spin-button,
         input[type="number"]::-webkit-inner-spin-button {
           -webkit-appearance: none;
@@ -22,9 +34,38 @@
         input[type="number"] {
           -moz-appearance: textfield;
         }
+
+        body {
+          @apply bg-slate-900 text-slate-300;
+        }
+
+        .form-input-dark {
+          @apply block w-full bg-slate-800/60 border-slate-700 rounded-lg shadow-sm text-slate-100
+                 focus:border-primary-500 focus:ring-primary-500 focus:ring-opacity-50;
+        }
       }
 
-      /* Aturan untuk ukuran kertas printer */
+      @layer components {
+        #daftar-nota-tersimpan > div {
+          @apply p-4 transition-all duration-150 ease-in-out hover:bg-slate-800/70 rounded-lg;
+        }
+        #daftar-nota-tersimpan > div > div:first-child p:first-child {
+          @apply font-semibold text-primary-400 text-base;
+        }
+        #daftar-nota-tersimpan > div > div:first-child p:nth-child(2) {
+          @apply text-sm text-slate-500;
+        }
+        #daftar-nota-tersimpan > div > div:first-child p:nth-child(3) {
+          @apply text-base font-semibold text-slate-100 mt-1;
+        }
+        .tombol-muat {
+          @apply bg-green-400/10 text-green-300 text-xs font-medium px-3 py-1 rounded-full shadow-sm hover:bg-green-400/20 transition-all !important;
+        }
+        .tombol-hapus {
+          @apply bg-red-400/10 text-red-300 text-xs font-medium px-3 py-1 rounded-full shadow-sm hover:bg-red-400/20 transition-all !important;
+        }
+      }
+
       @page {
         margin: 1cm;
       }
@@ -40,258 +81,343 @@
       @media print {
         body {
           font-family: "Courier New", Courier, monospace;
+          @apply bg-white text-black;
+        }
+        #nota-container {
+          @apply text-black shadow-none border-none;
         }
       }
     </style>
   </head>
   <body class="bg-gray-100 p-4 lg:p-8">
-    <div class="container mx-auto">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div
-          id="area-input"
-          class="lg:col-span-1 bg-white p-6 rounded-lg shadow-lg print:hidden h-fit"
-        >
-          <h1 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-3">
-            CV. MANDIRI PUTRA
-          </h1>
+    <div class="container mx-auto max-w-7xl px-4">
+      <h1 class="text-3xl font-bold tracking-tight text-white mb-8">
+        Dashboard Nota <span class="text-primary-400">CV. MANDIRI PUTRA</span>
+      </h1>
+    </div>
 
-          <fieldset class="border border-gray-300 p-4 rounded-md mb-6">
-            <legend class="px-2 font-semibold text-blue-600">
-              Info Pelanggan
-            </legend>
-            <div class="mb-4">
-              <label
-                for="nama-pelanggan"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Nama Pelanggan:</label
-              >
-              <input
-                type="text"
-                id="nama-pelanggan"
-                placeholder="cth: Bp. Budi Santoso"
-                class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label
-                for="alamat-pelanggan"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Alamat Pelanggan:</label
-              >
-              <input
-                type="text"
-                id="alamat-pelanggan"
-                placeholder="cth: Jl. Magelang Km 5, Sleman"
-                class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-          </fieldset>
-
-          <fieldset class="border border-gray-300 p-4 rounded-md mb-6">
-            <legend class="px-2 font-semibold text-blue-600">
-              Barang Sewa
-            </legend>
-            <div class="mb-4">
-              <label
-                for="nama-barang"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Nama Barang:</label
-              >
-              <input
-                type="text"
-                id="nama-barang"
-                list="barang-list"
-                placeholder="Ketik atau pilih barang..."
-                class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-              />
-              <datalist id="barang-list">
-                <option value="MAIN FRAME"></option>
-                <option value="CROSS BRACE"></option>
-                <option value="CAT WALK"></option>
-                <option value="JOIN PIN"></option>
-                <option value="U HEAD"></option>
-                <option value="JACK BASE"></option>
-                <option value="RODA"></option>
-              </datalist>
-            </div>
-            <div class="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <label
-                  for="qty"
-                  class="block text-sm font-medium text-gray-700 mb-1"
-                  >Jumlah (Qty):</label
-                >
-                <input
-                  type="number"
-                  id="qty"
-                  value="1"
-                  class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-              <div>
-                <label
-                  for="harga"
-                  class="block text-sm font-medium text-gray-700 mb-1"
-                  >Harga Satuan/Hari:</label
-                >
-                <input
-                  type="number"
-                  id="harga"
-                  placeholder="cth: 5000"
-                  class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            </div>
-            <button
-              id="tombol-tambah"
-              class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            >
-              Tambah Barang
-            </button>
-          </fieldset>
-
-          <fieldset class="border border-gray-300 p-4 rounded-md mb-6">
-            <legend class="px-2 font-semibold text-blue-600">Biaya Lain</legend>
-            <div class="mb-4">
-              <label
-                for="uang-transport"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Uang Transportasi:</label
-              >
-              <input
-                type="number"
-                id="uang-transport"
-                placeholder="cth: 50000"
-                value="0"
-                class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-          </fieldset>
-
-          <div class="flex space-x-3">
-            <button
-              id="tombol-simpan"
-              class="w-full bg-indigo-600 text-white py-3 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 text-lg font-bold"
-            >
-              💾 SIMPAN
-            </button>
-            <button
-              id="tombol-cetak"
-              class="w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 text-lg font-bold"
-            >
-              🖨️ CETAK
-            </button>
-          </div>
-          <button
-            id="tombol-baru"
-            class="w-full bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 mt-3"
-          >
-            Buat Nota Baru (Bersihkan)
-          </button>
-        </div>
-
-        <div class="area-cetak lg:col-span-2">
+    <div class="container mx-auto max-w-7xl px-4">
+      <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        <div class="lg:col-span-2 flex flex-col gap-8">
           <div
-            id="nota-container"
-            class="bg-white p-6 lg:p-10 shadow-lg border border-dashed border-gray-400 print:shadow-none print:border-none print:p-0"
+            id="area-input"
+            class="bg-slate-800/70 backdrop-blur-lg border border-slate-700/50 rounded-xl shadow-2xl shadow-primary-500/10 p-6 print:hidden"
           >
-            <div
-              class="flex items-center justify-between border-b-2 border-black pb-4"
+            <h2
+              class="text-xl font-semibold text-white mb-6 border-b border-slate-700 pb-4"
             >
-              <img
-                src="LOGO_MP-removebg-preview - Copy.png"
-                alt="Logo CV"
-                class="w-20 h-20 print:w-24 print:h-24 hidden sm:block print:block"
-              />
-              <div class="info-cv text-right">
-                <h2 class="text-xl sm:text-2xl font-bold">CV. MANDIRI PUTRA</h2>
-                <p class="text-sm sm:text-base">
-                  SOMOPURO, MUTIHAN, RT04/RW02, GANTIWARNO, KLATEN, JAWA TENGAH
-                </p>
-                <p class="text-sm sm:text-base">No. HP: 0877-4233-0300</p>
+              Buat Nota Baru
+            </h2>
+
+            <div class="mb-6">
+              <h3 class="text-base font-semibold text-primary-400 mb-3">
+                1. Info Pelanggan
+              </h3>
+              <div class="space-y-4">
+                <div>
+                  <label
+                    for="nama-pelanggan"
+                    class="block text-sm font-medium leading-6 text-slate-300"
+                    >Nama Pelanggan:</label
+                  >
+                  <input
+                    type="text"
+                    id="nama-pelanggan"
+                    placeholder="cth: Bp. Budi Santoso"
+                    class="form-input-dark"
+                  />
+                </div>
+                <div>
+                  <label
+                    for="alamat-pelanggan"
+                    class="block text-sm font-medium leading-6 text-slate-300"
+                    >Alamat Pelanggan:</label
+                  >
+                  <input
+                    type="text"
+                    id="alamat-pelanggan"
+                    placeholder="cth: Jl. Magelang Km 5, Sleman"
+                    class="form-input-dark"
+                  />
+                </div>
+                <div>
+                  <label
+                    for="hp-pelanggan"
+                    class="block text-sm font-medium leading-6 text-slate-300"
+                    >No. HP Pelanggan:</label
+                  >
+                  <input
+                    type="text"
+                    id="hp-pelanggan"
+                    placeholder="cth: 08123456789"
+                    class="form-input-dark"
+                  />
+                </div>
               </div>
             </div>
 
-            <div class="info-pelanggan my-6 space-y-1">
-              <p>
-                <strong>Pelanggan:</strong>
-                <span id="nota-nama-pelanggan" class="font-normal"></span>
-              </p>
-              <p>
-                <strong>Alamat:</strong>
-                <span id="nota-alamat-pelanggan" class="font-normal"></span>
-              </p>
-              <p>
-                <strong>Tanggal:</strong>
-                <span id="nota-tanggal" class="font-normal"></span>
-              </p>
+            <div class="mb-6 border-t border-slate-700 pt-6">
+              <h3 class="text-base font-semibold text-primary-400 mb-3">
+                2. Barang Sewa
+              </h3>
+              <div class="space-y-4">
+                <div>
+                  <label
+                    for="nama-barang"
+                    class="block text-sm font-medium leading-6 text-slate-300"
+                    >Nama Barang:</label
+                  >
+                  <input
+                    type="text"
+                    id="nama-barang"
+                    list="barang-list"
+                    placeholder="Ketik atau pilih barang..."
+                    class="form-input-dark"
+                  />
+                  <datalist id="barang-list">
+                    <option value="MAIN FRAME"></option>
+                    <option value="CROSS BRACE"></option>
+                    <option value="CAT WALK"></option>
+                    <option value="JOIN PIN"></option>
+                    <option value="U HEAD"></option>
+                    <option value="JACK BASE"></option>
+                    <option value="RODA"></option>
+                  </datalist>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label
+                      for="qty"
+                      class="block text-sm font-medium leading-6 text-slate-300"
+                      >Jumlah:</label
+                    >
+                    <input
+                      type="number"
+                      id="qty"
+                      value="1"
+                      class="form-input-dark"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      for="harga"
+                      class="block text-sm font-medium leading-6 text-slate-300"
+                      >Harga/Hari:</label
+                    >
+                    <input
+                      type="number"
+                      id="harga"
+                      placeholder="cth: 5000"
+                      class="form-input-dark"
+                    />
+                  </div>
+                </div>
+                <button
+                  id="tombol-tambah"
+                  class="w-full bg-slate-700 text-primary-300 py-2 px-4 rounded-lg shadow-md hover:bg-slate-600 transition-all duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-slate-900 font-medium"
+                >
+                  + Tambah Barang
+                </button>
+              </div>
             </div>
 
-            <table class="item-list w-full mb-6">
-              <thead class="bg-gray-100 border-b border-gray-300">
-                <tr>
-                  <th class="text-left p-2 font-semibold">Nama Barang</th>
-                  <th class="text-right p-2 font-semibold">Jumlah</th>
-                  <th class="text-right p-2 font-semibold">Harga Satuan</th>
-                  <th class="text-right p-2 font-semibold">Subtotal</th>
-                </tr>
-              </thead>
-              <tbody id="nota-items" class="divide-y divide-gray-200"></tbody>
-            </table>
+            <div class="mb-6 border-t border-slate-700 pt-6">
+              <h3 class="text-base font-semibold text-primary-400 mb-3">
+                3. Biaya Lain
+              </h3>
+              <div>
+                <label
+                  for="uang-transport"
+                  class="block text-sm font-medium leading-6 text-slate-300"
+                  >Uang Transportasi:</label
+                >
+                <input
+                  type="number"
+                  id="uang-transport"
+                  placeholder="cth: 50000"
+                  value="0"
+                  class="form-input-dark"
+                />
+              </div>
+            </div>
 
-            <hr class="border-t-2 border-dashed border-gray-400 my-4" />
+            <div class="border-t border-slate-700 pt-6">
+              <h3 class="text-base font-semibold text-primary-400 mb-3">
+                4. Aksi
+              </h3>
+              <div class="flex space-x-3">
+                <button
+                  id="tombol-simpan"
+                  class="w-full bg-primary-500 text-slate-900 py-3 px-4 rounded-lg shadow-lg shadow-primary-500/30 hover:bg-primary-400 transition-all duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2 focus:ring-offset-slate-900 text-base font-bold"
+                >
+                  💾 SIMPAN
+                </button>
+                <button
+                  id="tombol-cetak"
+                  class="w-full bg-green-500 text-slate-900 py-3 px-4 rounded-lg shadow-lg shadow-green-500/30 hover:bg-green-400 transition-all duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 focus:ring-offset-slate-900 text-base font-bold"
+                >
+                  🖨️ CETAK
+                </button>
+              </div>
+              <button
+                id="tombol-baru"
+                class="w-full bg-slate-600 text-slate-100 py-2 px-4 rounded-lg shadow-md hover:bg-slate-500 transition-all duration-150 ease-in-out mt-3 font-medium"
+              >
+                Buat Nota Baru (Bersihkan)
+              </button>
+            </div>
+          </div>
 
-            <div class="total-akhir flex justify-end">
-              <table class="tabel-total w-full sm:w-1/2">
-                <tbody>
-                  <tr class="text-right">
-                    <td class="p-1">Total Sewa Barang:</td>
-                    <td id="nota-total-barang" class="p-1 font-semibold">
-                      Rp 0
-                    </td>
-                  </tr>
-                  <tr class="text-right">
-                    <td class="p-1">Uang Transportasi:</td>
-                    <td id="nota-transport" class="p-1 font-semibold">Rp 0</td>
-                  </tr>
-                  <tr
-                    class="grand-total-row text-right text-lg font-bold border-t-2 border-black"
-                  >
-                    <td class="p-2">GRAND TOTAL:</td>
-                    <td id="nota-grand-total" class="p-2">Rp 0</td>
-                  </tr>
-                </tbody>
-              </table>
+          <div
+            id="area-tersimpan"
+            class="bg-slate-800/70 backdrop-blur-lg border border-slate-700/50 rounded-xl shadow-2xl shadow-primary-500/10 p-6 print:hidden"
+          >
+            <h2
+              class="text-xl font-semibold text-white mb-6 border-b border-slate-700 pb-4"
+            >
+              Nota Tersimpan
+            </h2>
+
+            <div class="relative mb-4">
+              <div
+                class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  class="w-5 h-5 text-gray-500"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </div>
+              <input
+                type="search"
+                id="input-cari"
+                placeholder="Cari nota berdasarkan nama pelanggan..."
+                class="form-input-dark pl-10 p-3"
+              />
             </div>
 
             <div
-              class="footer text-center mt-8 pt-4 border-t border-gray-200 print:hidden"
+              id="daftar-nota-tersimpan"
+              class="divide-y divide-slate-700"
+            ></div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-3">
+          <div class="lg:sticky lg:top-8">
+            <h2
+              class="text-xl font-semibold text-white mb-6 lg:mb-4 print:hidden"
             >
-              <p class="text-xs text-gray-600">Terima kasih atas sewa Anda.</p>
-              <p class="text-xs text-gray-600">
-                Barang harap dikembalikan dalam kondisi baik.
-              </p>
+              Pratinjau Nota
+            </h2>
+
+            <div class="area-cetak">
+              <div
+                id="nota-container"
+                class="bg-white text-black p-6 lg:p-10 rounded-xl shadow-2xl shadow-primary-500/20 print:shadow-none print:border-none print:p-0 print:rounded-none"
+              >
+                <div
+                  class="flex items-center justify-between border-b-2 border-black pb-4"
+                >
+                  <img
+                    src="LOGO_MP-removebg-preview - Copy.png"
+                    alt="Logo CV"
+                    class="w-20 h-20 print:w-24 print:h-24 hidden sm:block print:block"
+                  />
+                  <div class="info-cv text-right">
+                    <h2 class="text-xl sm:text-2xl font-bold">
+                      CV. MANDIRI PUTRA
+                    </h2>
+                    <p class="text-sm sm:text-base">
+                      SOMOPURO, MUTIHAN, RT04/RW02, GANTIWARNO, KLATEN, JAWA
+                      TENGAH
+                    </p>
+                    <p class="text-sm sm:text-base">No. HP: 0877-4233-0300</p>
+                  </div>
+                </div>
+
+                <div class="info-pelanggan my-6 space-y-1">
+                  <p>
+                    <strong>Pelanggan:</strong>
+                    <span id="nota-nama-pelanggan" class="font-normal"></span>
+                  </p>
+                  <p>
+                    <strong>Alamat:</strong>
+                    <span id="nota-alamat-pelanggan" class="font-normal"></span>
+                  </p>
+                  <p>
+                    <strong>No. HP:</strong>
+                    <span id="nota-hp-pelanggan" class="font-normal"></span>
+                  </p>
+                  <p>
+                    <strong>Tanggal:</strong>
+                    <span id="nota-tanggal" class="font-normal"></span>
+                  </p>
+                </div>
+
+                <table class="item-list w-full mb-6">
+                  <thead class="bg-gray-100 border-b border-gray-300">
+                    <tr>
+                      <th class="text-left p-2 font-semibold">Nama Barang</th>
+                      <th class="text-right p-2 font-semibold">Jumlah</th>
+                      <th class="text-right p-2 font-semibold">Harga Satuan</th>
+                      <th class="text-right p-2 font-semibold">Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody
+                    id="nota-items"
+                    class="divide-y divide-gray-200"
+                  ></tbody>
+                </table>
+
+                <hr class="border-t-2 border-dashed border-gray-400 my-4" />
+
+                <div class="total-akhir flex justify-end">
+                  <table class="tabel-total w-full sm:w-1/2">
+                    <tbody>
+                      <tr class="text-right">
+                        <td class="p-1">Total Sewa Barang:</td>
+                        <td id="nota-total-barang" class="p-1 font-semibold">
+                          Rp 0
+                        </td>
+                      </tr>
+                      <tr class="text-right">
+                        <td class="p-1">Uang Transportasi:</td>
+                        <td id="nota-transport" class="p-1 font-semibold">
+                          Rp 0
+                        </td>
+                      </tr>
+                      <tr
+                        class="grand-total-row text-right text-lg font-bold border-t-2 border-black"
+                      >
+                        <td class="p-2">GRAND TOTAL:</td>
+                        <td id="nota-grand-total" class="p-2">Rp 0</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div
+                  class="footer text-center mt-8 pt-4 border-t border-gray-200 print:hidden"
+                >
+                  <p class="text-xs text-gray-600">
+                    Terima kasih atas sewa Anda.
+                  </p>
+                  <p class="text-xs text-gray-600">
+                    Barang harap dikembalikan dalam kondisi baik.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      <div
-        id="area-tersimpan"
-        class="mt-12 bg-white p-6 rounded-lg shadow-lg print:hidden"
-      >
-        <h2 class="text-2xl font-bold text-gray-800 mb-4">
-          Daftar Nota Tersimpan
-        </h2>
-
-        <input
-          type="search"
-          id="input-cari"
-          placeholder="Cari nota berdasarkan nama pelanggan..."
-          class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 mb-4 p-3"
-        />
-
-        <div id="daftar-nota-tersimpan" class="divide-y divide-gray-200"></div>
       </div>
     </div>
 
@@ -316,4 +442,3 @@
     </script>
   </body>
 </html>
-

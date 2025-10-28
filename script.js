@@ -9,7 +9,6 @@ document.addEventListener("DOMContentLoaded", function() {
     // --- AMBIL ELEMEN INPUT ---
     const namaPelangganInput = document.getElementById("nama-pelanggan");
     const alamatPelangganInput = document.getElementById("alamat-pelanggan");
-    const hpPelangganInput = document.getElementById("hp-pelanggan"); // === TAMBAHAN ===
     const uangTransportInput = document.getElementById("uang-transport");
     const namaBarangInput = document.getElementById("nama-barang"); 
     const qtyInput = document.getElementById("qty");
@@ -25,7 +24,6 @@ document.addEventListener("DOMContentLoaded", function() {
     const notaItemList = document.getElementById("nota-items");
     const notaNamaPelanggan = document.getElementById("nota-nama-pelanggan");
     const notaAlamatPelanggan = document.getElementById("nota-alamat-pelanggan");
-    const notaHpPelanggan = document.getElementById("nota-hp-pelanggan"); // === TAMBAHAN ===
     const notaTanggal = document.getElementById("nota-tanggal");
     const notaTotalBarang = document.getElementById("nota-total-barang");
     const notaTransport = document.getElementById("nota-transport");
@@ -98,7 +96,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const subtotal = qty * harga;
         
         const barisBaru = document.createElement("tr");
-        barisBaru.className = "border-b item-row border-gray-200"; // Tambah class 'item-row'
+        barisBaru.className = "border-b item-row"; // Tambah class 'item-row'
         barisBaru.innerHTML = `
             <td class="p-2" data-field="namaBarang">${namaBarang}</td>
             <td class="p-2 text-right" data-field="qty">${qty}</td>
@@ -153,7 +151,6 @@ document.addEventListener("DOMContentLoaded", function() {
     function perbaruiPreviewNota() {
         notaNamaPelanggan.textContent = namaPelangganInput.value || "-";
         notaAlamatPelanggan.textContent = alamatPelangganInput.value || "-";
-        notaHpPelanggan.textContent = hpPelangganInput.value || "-"; // === TAMBAHAN ===
         
         const hariIni = new Date();
         notaTanggal.textContent = formatTanggal(hariIni).split(',')[0]; // Hanya tanggal
@@ -167,7 +164,6 @@ document.addEventListener("DOMContentLoaded", function() {
     function bersihkanForm() {
         namaPelangganInput.value = "";
         alamatPelangganInput.value = "";
-        hpPelangganInput.value = ""; // === TAMBAHAN ===
         uangTransportInput.value = "0";
         namaBarangInput.value = "";
         qtyInput.value = "1";
@@ -205,7 +201,6 @@ document.addEventListener("DOMContentLoaded", function() {
             id: idNotaSaatIni || 'NOTA-' + Date.now(), // Gunakan ID lama jika ada, atau buat baru
             namaPelanggan: namaPelangganInput.value,
             alamatPelanggan: alamatPelangganInput.value,
-            hpPelanggan: hpPelangganInput.value, // === TAMBAHAN ===
             uangTransport: transport,
             totalSewaBarang: totalSewaBarang,
             grandTotal: grandTotal,
@@ -255,6 +250,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
         // Lakukan pencarian
         if (filter) {
+            // Gunakan index 'namaPelanggan'
+            const index = store.index('namaPelanggan');
+            // IDBKeyRange.bound(filter.toLowerCase(), filter.toLowerCase() + '\uffff')
+            // adalah cara 'startsWith' yang rumit.
+            // Cara lebih mudah: ambil semua, filter di JS
             let allData = await store.getAll();
             allNotas = allData.filter(nota => 
                 nota.namaPelanggan.toLowerCase().includes(filter.toLowerCase())
@@ -270,23 +270,23 @@ document.addEventListener("DOMContentLoaded", function() {
         daftarNotaTersimpan.innerHTML = "";
         
         if (allNotas.length === 0) {
-            daftarNotaTersimpan.innerHTML = `<p class="text-slate-500 text-center p-4">Tidak ada nota tersimpan.</p>`;
+            daftarNotaTersimpan.innerHTML = `<p class="text-gray-500 text-center p-4">Tidak ada nota tersimpan.</p>`;
             return;
         }
 
         // Tampilkan setiap nota
         allNotas.forEach(nota => {
             const div = document.createElement('div');
-            // Class diatur oleh @layer components di CSS, kita hanya butuh struktur
+            div.className = "flex justify-between items-center p-4 hover:bg-gray-50";
             div.innerHTML = `
                 <div>
-                    <p>${nota.namaPelanggan}</p>
-                    <p>${formatTanggal(nota.tanggal)}</p>
-                    <p>${formatRupiah(nota.grandTotal)}</p>
+                    <p class="font-bold text-blue-700">${nota.namaPelanggan}</p>
+                    <p class="text-sm text-gray-600">${formatTanggal(nota.tanggal)}</p>
+                    <p class="text-sm font-semibold">${formatRupiah(nota.grandTotal)}</p>
                 </div>
                 <div class="flex space-x-2">
-                    <button data-id="${nota.id}" class="tombol-muat">Muat</button>
-                    <button data-id="${nota.id}" class="tombol-hapus">Hapus</button>
+                    <button data-id="${nota.id}" class="tombol-muat bg-green-500 text-white px-3 py-1 rounded shadow hover:bg-green-600">Muat</button>
+                    <button data-id="${nota.id}" class="tombol-hapus bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600">Hapus</button>
                 </div>
             `;
             daftarNotaTersimpan.appendChild(div);
@@ -311,13 +311,12 @@ document.addEventListener("DOMContentLoaded", function() {
             idNotaSaatIni = nota.id; // SET ID SAAT INI
             namaPelangganInput.value = nota.namaPelanggan;
             alamatPelangganInput.value = nota.alamatPelanggan;
-            hpPelangganInput.value = nota.hpPelanggan || ""; // === TAMBAHAN ===
             uangTransportInput.value = nota.uangTransport;
             
             // 3. Isi kembali tabel barang
             nota.items.forEach(item => {
                 const barisBaru = document.createElement("tr");
-                barisBaru.className = "border-b item-row border-gray-200";
+                barisBaru.className = "border-b item-row";
                 barisBaru.innerHTML = `
                     <td class="p-2" data-field="namaBarang">${item.namaBarang}</td>
                     <td class="p-2 text-right" data-field="qty">${item.qty}</td>
@@ -385,7 +384,6 @@ document.addEventListener("DOMContentLoaded", function() {
     // Update otomatis saat input diubah
     namaPelangganInput.addEventListener("input", perbaruiPreviewNota);
     alamatPelangganInput.addEventListener("input", perbaruiPreviewNota);
-    hpPelangganInput.addEventListener("input", perbaruiPreviewNota); // === TAMBAHAN ===
     uangTransportInput.addEventListener("input", perbaruiPreviewNota);
     
     // Fitur Pencarian (live search)
